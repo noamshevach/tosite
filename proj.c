@@ -14,8 +14,9 @@ int main(int argc, char* argv[])
 	string s = malloc(sizeof(string) * maxStringLength);
 	string fileNames[maxFilesOnRun];
 	getFileName(fileNames, argv[0]);
-	/*fileNames[i] = "ex1";
-	fileNames[i] = "ex";*/
+	/*fileNames[0] = "ex1";
+	fileNames[1] = "ex";
+	fileNames[2] = "NULL";*/
 	for(;strcmp(fileNames[i], "NULL") != 0; i++){
 		initSymbolTable(labelTABLE);
 		initSymbolTable(entryTABLE);
@@ -48,12 +49,12 @@ void getFileName(string fileNames[], string progName)
 	line ln;
 	bool temp = FALSE;
 	int i = 0, idx = 0;
-/*	printf("Write 'assembler' and then the name of the files you want to run.\n"
-		"example: assembler x y hello\nYour command:");*/
+	printf("Write 'assembler' and then the name of the files you want to run.\n"
+		"example: assembler x y hello\nYour command:");
 	fgets(s, maxLineLength, stdin);
 	ln = readNextWord(s, &idx, &temp);
 	progName = strrchr(progName, '/') + 1;
-	progName[strlen(progName) - 4] = '\0';
+	/*progName[strlen(progName) - 4] = '\0';*/
 	if(strcmp(ln.word, progName) == 0){
 		do {
 			ln = readNextWord(s, &idx, &temp);
