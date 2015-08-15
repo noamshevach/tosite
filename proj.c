@@ -15,12 +15,14 @@ int main()
 	string fileNames[maxFilesOnRun];
 	getFileName(fileNames);
 	/*fileNames[i] = "ex1";*/
+	/*fileNames[i] = "ex";*/
 	for(;strcmp(fileNames[i], "NULL") != 0; i++){
 		initSymbolTable(labelTABLE);
 		initSymbolTable(entryTABLE);
 		initSymbolTable(externTABLE);
 		QUE_initiate();
 
+		/*fileNames[i][strlen(fileNames[i]) - 1] = '\0';*/
 		if((fp = fopen(strcat(strcpy(s, fileNames[i]), asEndOfFile), "r")) == NULL )
 			fprintf(stderr, "\nError opening file %s ", fileNames[i]);
 		else{
@@ -58,7 +60,7 @@ void getFileName(string fileNames[])
 		}while(strcmp(fileNames[i++], "EMPTY") != 0);
 	}else fprintf(stderr, "wrong input. check your way of writing assembler.");
 	fileNames[i - 1] = "NULL";
-	free(s);
+	/*free(s);*/
 }
 
 /*
@@ -247,7 +249,7 @@ void firstStep(FILE* fp)
 				}
 			}
 		}else errFlag = TRUE;
-		free(addType);
+		/*free(addType);*/
 	}
 	mem[IC].fieldNum = -1;
 }
@@ -619,7 +621,7 @@ line readNextWord(string stream, int* idx, bool* stepOneEnd)
 	nextBreak = returnNextBreakIdx(stream, (*idx), stepOneEnd);
 	(*ln).word = malloc(sizeof(string));
 	strncpy((*ln).word ,stream + (*idx), nextBreak - (*idx));
-	(*ln).word[nextBreak - (*idx)] = (char)'\0';
+	(*ln).word[nextBreak - (*idx)] = '\0';
 	(*idx) = nextBreak + 1;
 	return (*ln);
 }
@@ -679,5 +681,5 @@ void getLine(FILE* fp, line ln[], bool* stepOneEnd)
 			ln[i + 1].wordIdx = ln[i].wordIdx;
 		i++;
 	}
-	free(startline);
+	/*free(startline);*/
 }
