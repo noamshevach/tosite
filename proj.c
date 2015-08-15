@@ -6,23 +6,22 @@
 #include "Queue.h"
 #include "SymbolTable.h"
 
-int main()
+int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 	int  i = 0; FILE* fp;
 	string s = malloc(sizeof(string) * maxStringLength);
 	string fileNames[maxFilesOnRun];
-	getFileName(fileNames);
-	/*fileNames[i] = "ex1";*/
-	/*fileNames[i] = "ex";*/
+	getFileName(fileNames, argv[0]);
+	/*fileNames[i] = "ex1";
+	fileNames[i] = "ex";*/
 	for(;strcmp(fileNames[i], "NULL") != 0; i++){
 		initSymbolTable(labelTABLE);
 		initSymbolTable(entryTABLE);
 		initSymbolTable(externTABLE);
 		QUE_initiate();
 
-		/*fileNames[i][strlen(fileNames[i]) - 1] = '\0';*/
 		if((fp = fopen(strcat(strcpy(s, fileNames[i]), asEndOfFile), "r")) == NULL )
 			fprintf(stderr, "\nError opening file %s ", fileNames[i]);
 		else{
@@ -43,17 +42,19 @@ int main()
  * This function is reading from input names of files.
  * fileNames - array of file names.
  */
-void getFileName(string fileNames[])
+void getFileName(string fileNames[], string progName)
 {
 	string s = malloc(sizeof(string));
 	line ln;
 	bool temp = FALSE;
 	int i = 0, idx = 0;
-	printf("Write 'assembler' and then the name of the files you want to run.\n"
-			"example: assembler x y hello\nYour command:");
+/*	printf("Write 'assembler' and then the name of the files you want to run.\n"
+		"example: assembler x y hello\nYour command:");*/
 	fgets(s, maxLineLength, stdin);
 	ln = readNextWord(s, &idx, &temp);
-	if(strcmp(ln.word, "assembler") == 0){
+	progName = strrchr(progName, '/') + 1;
+	progName[strlen(progName) - 4] = '\0';
+	if(strcmp(ln.word, progName) == 0){
 		do {
 			ln = readNextWord(s, &idx, &temp);
 			fileNames[i] = ln.word;
@@ -249,7 +250,7 @@ void firstStep(FILE* fp)
 				}
 			}
 		}else errFlag = TRUE;
-		/*free(addType);*/
+		free(addType);
 	}
 	mem[IC].fieldNum = -1;
 }
@@ -621,7 +622,7 @@ line readNextWord(string stream, int* idx, bool* stepOneEnd)
 	nextBreak = returnNextBreakIdx(stream, (*idx), stepOneEnd);
 	(*ln).word = malloc(sizeof(string));
 	strncpy((*ln).word ,stream + (*idx), nextBreak - (*idx));
-	(*ln).word[nextBreak - (*idx)] = '\0';
+	(*ln).word[nextBreak - (*idx)] = (char)'\0';
 	(*idx) = nextBreak + 1;
 	return (*ln);
 }
@@ -681,5 +682,5 @@ void getLine(FILE* fp, line ln[], bool* stepOneEnd)
 			ln[i + 1].wordIdx = ln[i].wordIdx;
 		i++;
 	}
-	/*free(startline);*/
+	free(startline);
 }

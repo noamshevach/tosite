@@ -115,7 +115,7 @@ typedef struct line
 	int wordIdx;
 }line;
 
-void getFileName(string fileNames[]);
+void getFileName(string fileNames[], string progName);
 string getSubString(string s, int start, int end);
 void printBinary(int num, int digits, FILE* fp);
 void printBase4(int num, int digits, FILE* fp);
