@@ -6,24 +6,29 @@
 #include "Queue.h"
 #include "SymbolTable.h"
 
-int main(int argc, char* argv[])
+/*int main(int argc, char* argv[])
 {
 	int  i = 1; FILE* fp;
+	string filename = malloc(sizeof(string));
 	for(;argv[i] != NULL; i++){
 		initSymbolTable(labelTABLE);
 		initSymbolTable(entryTABLE);
 		initSymbolTable(externTABLE);
 		QUE_initiate();
-		string filename = strdup(argv[i]);
+		strcpy(filename, argv[i]);
 
 		if((fp = fopen(strcat(filename, asEndOfFile), "r")) == NULL )
 			fprintf(stderr, "\nError opening file %s ", argv[i]);
 		else{
+			strcpy(filename, argv[i]);
 			firstStep(fp);
 			secondStep();
 			printMemory(strcat(filename,obEndOfFile));
+			strcpy(filename, argv[i]);
 			printGuideLines(strcat(filename,obEndOfFile));
+			strcpy(filename, argv[i]);
 			printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
+			strcpy(filename, argv[i]);
 			printExternTable(strcat(filename,extEndOfFile));
 		}
 		freeSymbolTable(labelTABLE);
@@ -31,14 +36,14 @@ int main(int argc, char* argv[])
 		freeSymbolTable(externTABLE);
 	}
 	return 1;
-}
+}*/
 
-/*int main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 	int  i = 1; FILE* fp;
-	string filename = strdup("ex1");
+	string filename = strdup("ex");
 	initSymbolTable(labelTABLE);
 	initSymbolTable(entryTABLE);
 	initSymbolTable(externTABLE);
@@ -49,20 +54,20 @@ int main(int argc, char* argv[])
 	else{
 		firstStep(fp);
 		secondStep();
-		filename = strdup("ex1");
+		strcpy(filename, "ex");
 		printMemory(strcat(filename,obEndOfFile));
-		filename = strdup("ex1");
+		strcpy(filename, "ex");
 		printGuideLines(strcat(filename,obEndOfFile));
-		filename = strdup("ex1");
+		strcpy(filename, "ex");
 		printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
-		filename = strdup("ex1");
+		strcpy(filename, "ex");
 		printExternTable(strcat(filename,extEndOfFile));
 	}
 	freeSymbolTable(labelTABLE);
 	freeSymbolTable(entryTABLE);
 	freeSymbolTable(externTABLE);
 	return 1;
-}*/
+}
 
 /*
  * This function is reading from input names of files.
