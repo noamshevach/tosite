@@ -1,3 +1,4 @@
+#include <stdio.h>
 #ifndef PROJ_H
 #define PROJ_H
 
@@ -15,6 +16,7 @@
 #define entEndOfFile  ".ent"
 #define extEndOfFile  ".ext"
 #define tabSpaces 8
+#define endOfData 4090
 
 typedef char* string;
 typedef enum boolean { FALSE,TRUE} bool;
@@ -49,17 +51,15 @@ typedef struct sregister
 typedef union commandline
 {
 	regcommandline cml;
-	enum boolean isData;
 	address label; /* address of label*/
 	address number; /* # - number*/
 	sregister reg;
-	enum boolean isString;
 }commandline;
 
 /* memory*/
 typedef struct memory{
 	commandline cml;
-	short fieldNum;
+	short fieldNum; /* 1- cml , 3- label, 4- number, 5 - reg */
 }memory;
 
 /* commands*/
@@ -89,19 +89,11 @@ struct{
 };
 
 /*guide lines*/
-typedef struct data{
-	signed int num :12;
-} data;
-
-typedef struct str{
-	unsigned int ascii :12;
-} str;
-
-typedef union guideline
-{
-	data d;
-	str s;
-}guideline;
+typedef struct guideline{
+	signed int data :12;
+	unsigned int string :12; /* ascii */
+	unsigned int isData: 1;
+} guideline;
 
 int IC = 0, DC = 0;
 memory mem[memorySize];
@@ -115,8 +107,8 @@ typedef struct line
 	int wordIdx;
 }line;
 
+void printGuideLines(string file);
 void getFileName(string fileNames[], string progName);
-string getSubString(string s, int start, int end);
 void printBinary(int num, int digits, FILE* fp);
 void printBase4(int num, int digits, FILE* fp);
 void cast10To4(int num, FILE* fp);
@@ -134,7 +126,6 @@ void guideSentence(line ln[]);
 int isBreak(char c, bool* stepOneEnd);
 int returnNextBreakIdx(string str, int idx, bool* stepOneEnd);
 int checkCmd(line l, int* repeatCmd);
-int between1TO10(int num);
 int checkAddresingType(string str);
 int isRegister(string str);
 void setLineInMemory(int cmdNum, int addType[], line first, line second, line lastOperand);
@@ -142,6 +133,7 @@ void setVariableOnMemory(int idx, int type, line word, line lastOperand);
 void getLine(FILE* fp, line ln[5],bool* stepOneEnd);
 int handleData(int idx, string stream,bool* stepOneEnd);
 line readNextWord(string stream, int* idx, bool* stepOneEnd);
+int between1TO10(int num);
 
 
 #endif

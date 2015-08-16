@@ -8,29 +8,23 @@
 
 int main(int argc, char* argv[])
 {
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-	int  i = 0; FILE* fp;
-	string s = malloc(sizeof(string) * maxStringLength);
-	string fileNames[maxFilesOnRun];
-	getFileName(fileNames, argv[0]);
-	/*fileNames[0] = "ex1";
-	fileNames[1] = "ex";
-	fileNames[2] = "NULL";*/
-	for(;strcmp(fileNames[i], "NULL") != 0; i++){
+	int  i = 1; FILE* fp;
+	for(;argv[i] != NULL; i++){
 		initSymbolTable(labelTABLE);
 		initSymbolTable(entryTABLE);
 		initSymbolTable(externTABLE);
 		QUE_initiate();
+		string filename = strdup(argv[i]);
 
-		if((fp = fopen(strcat(strcpy(s, fileNames[i]), asEndOfFile), "r")) == NULL )
-			fprintf(stderr, "\nError opening file %s ", fileNames[i]);
+		if((fp = fopen(strcat(filename, asEndOfFile), "r")) == NULL )
+			fprintf(stderr, "\nError opening file %s ", argv[i]);
 		else{
 			firstStep(fp);
 			secondStep();
-			printMemory(strcat(strcpy(s, fileNames[i]),obEndOfFile));
-			printEntryTable(entryTABLE, strcat(strcpy(s, fileNames[i]),entEndOfFile));
-			printExternTable(strcat(strcpy(s, fileNames[i]),extEndOfFile));
+			printMemory(strcat(filename,obEndOfFile));
+			printGuideLines(strcat(filename,obEndOfFile));
+			printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
+			printExternTable(strcat(filename,extEndOfFile));
 		}
 		freeSymbolTable(labelTABLE);
 		freeSymbolTable(entryTABLE);
@@ -38,6 +32,37 @@ int main(int argc, char* argv[])
 	}
 	return 1;
 }
+
+/*int main(int argc, char* argv[])
+{
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
+	int  i = 1; FILE* fp;
+	string filename = strdup("ex1");
+	initSymbolTable(labelTABLE);
+	initSymbolTable(entryTABLE);
+	initSymbolTable(externTABLE);
+	QUE_initiate();
+
+	if((fp = fopen(strcat(filename, asEndOfFile), "r")) == NULL )
+		fprintf(stderr, "\nError opening file %s ", argv[i]);
+	else{
+		firstStep(fp);
+		secondStep();
+		filename = strdup("ex1");
+		printMemory(strcat(filename,obEndOfFile));
+		filename = strdup("ex1");
+		printGuideLines(strcat(filename,obEndOfFile));
+		filename = strdup("ex1");
+		printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
+		filename = strdup("ex1");
+		printExternTable(strcat(filename,extEndOfFile));
+	}
+	freeSymbolTable(labelTABLE);
+	freeSymbolTable(entryTABLE);
+	freeSymbolTable(externTABLE);
+	return 1;
+}*/
 
 /*
  * This function is reading from input names of files.
@@ -54,7 +79,6 @@ void getFileName(string fileNames[], string progName)
 	fgets(s, maxLineLength, stdin);
 	ln = readNextWord(s, &idx, &temp);
 	progName = strrchr(progName, '/') + 1;
-	/*progName[strlen(progName) - 4] = '\0';*/
 	if(strcmp(ln.word, progName) == 0){
 		do {
 			ln = readNextWord(s, &idx, &temp);
@@ -63,22 +87,6 @@ void getFileName(string fileNames[], string progName)
 	}else fprintf(stderr, "wrong input. check your way of writing assembler.");
 	fileNames[i - 1] = "NULL";
 	/*free(s);*/
-}
-
-/*
- * This function returns a substring from index start to index end.
- * start - start index.
- * end - end index.
- * returns  a substring from index start to index end.
- */
-string getSubString(string s, int start, int end)
-{
-	string temp = malloc(sizeof(string));
-	int i = 0;
-	for(; (i + start) < end; i++)
-		temp[i] = s[i + start];
-	temp[i] = '\0';
-	return temp;
 }
 
 /*
@@ -137,13 +145,36 @@ void cast10To4(int num, FILE* fp)
 	fprintf(fp, "%d ", shever);
 }
 
+/**
+ * This function prints the part of the data in memory.
+ * file - the destination file.
+ */
+void printGuideLines(string file)
+{
+	int i = 0;
+	FILE* fp = fopen(file, "a+");
+	for(; guidel[i].string != endOfData; i++)
+	{
+		cast10To4(IC + i+ startIcValue, fp);
+		switch(guidel[i].isData){
+			case 1:
+				printBase4(guidel[i].data, 12, fp);
+				break;
+			case 0:
+				printBase4(guidel[i].string, 12, fp);
+				break;
+		}
+		fprintf(fp, "\n");
+	}
+}
+
 /*
  * This function prints the memory to a file.
  * file - the file which we write to.
  */
 void printMemory(string file)
 {
-	int i = 0, z = 0;
+	int i = 0;
 	int temp = 0;
 	FILE* fp = fopen(file, "w");
 	for(; i < memorySize; i++)
@@ -158,9 +189,6 @@ void printMemory(string file)
 				printBase4(mem[i].cml.cml.src, 2, fp);
 				printBase4(mem[i].cml.cml.dest, 2, fp);
 				printBase4(mem[i].cml.cml.era, 2, fp);
-				break;
-			case 2:
-				printBase4(guidel[z++].d.num, 12, fp);
 				break;
 			case 3:
 				if(mem[i].cml.label.era == 2){
@@ -182,12 +210,10 @@ void printMemory(string file)
 				printBase4(temp, 6, fp);
 				printBase4(mem[i].cml.reg.era, 2, fp);
 				break;
-			case 6:
-				printBase4(guidel[z++].s.ascii, 12, fp);
-				break;
 		}
 		fprintf(fp, "\n");
 	}
+	IC = i;
 }
 
 /*
@@ -222,8 +248,12 @@ void firstStep(FILE* fp)
 			continue;
 		if((ln[z].word[0] == ';' && strcmp(ln[0].word, "NULL") == 0) || (ln[0].word[0] == ';' ))
 			continue;
-		if(isLabelOK(ln[z - 1]))
-			insertToSymbolTable(labelTABLE, ln[z - 1].word, IC);
+		if(isLabelOK(ln[z - 1])){
+			if(ln[z].word[0] != '.')
+				insertToSymbolTable(labelTABLE, ln[z - 1].word, IC);
+			else
+				insertToSymbolTable(labelTABLE, ln[z - 1].word, DC);
+		}
 		if(ln[z].word[0] == '.'){ /* in case of guide sentence*/
 			guideSentence(ln);
 			continue;
@@ -254,6 +284,7 @@ void firstStep(FILE* fp)
 		free(addType);
 	}
 	mem[IC].fieldNum = -1;
+	guidel[DC].string = endOfData;
 }
 
 /**
@@ -415,21 +446,15 @@ int setLabelAddressInMemory(int memIdx, int address)
 void guideSentence(line ln[])
 {
 	int i = 0;
-	if(strcmp(ln[1].word, ".data") == 0){
-		IC += ln[1].wordIdx;
+	if(strcmp(ln[1].word, ".data") == 0)
 		DC += ln[1].wordIdx;
-	}
+
 	if(strcmp(ln[1].word, ".string") == 0){
 		if(ln[2].word[0] != '\"' || ln[2].word[strlen(ln[2].word) -1] != '\"')
 			fprintf(stderr, "\n[line %d]: String without quotes. ",lineNumber);
-		for(i = 1; i < strlen(ln[2].word) -1; i++, IC++, DC++){
-			guidel[DC].s.ascii = ln[2].word[i];
-			mem[IC].cml.isString = TRUE;
-			mem[IC].fieldNum = 6;
-		}
-		guidel[DC++].s.ascii = 0;
-		mem[IC].cml.isString = TRUE;
-		mem[IC++].fieldNum = 6;
+		for(i = 1; i < strlen(ln[2].word) -1; i++, DC++)
+			guidel[DC].string = ln[2].word[i];
+		guidel[DC++].string = 0;
 	}
 	if(strcmp(ln[1].word, ".entry") == 0)
 		insertToSymbolTable(entryTABLE, ln[2].word, 0);
@@ -481,9 +506,11 @@ int checkCmd(line l, int* repeatCmd)
 {
 	int i = 0;
 	if(between1TO10(l.word[strlen(l.word) - 1] - '0')){
-		(*repeatCmd) = l.word[strlen(l.word) - 1] - '0';
-		l.word[strlen(l.word) - 1] = '\0';
-	}
+		if( l.word[strlen(l.word) - 1]  == '1' || l.word[strlen(l.word) - 1]  == '2')  {
+			(*repeatCmd) = l.word[strlen(l.word) - 1] - '0';
+			l.word[strlen(l.word) - 1] = '\0';
+		}else fprintf(stderr, "\n[line %d]: The number of repetitions after command must be 1 or 2.", lineNumber);
+	}else fprintf(stderr, "\n[line %d]: After command you have to write number of repetitions (1 or 2).", lineNumber);
 	for(; i < numOfCommands + 1; i++ )
 		if(strcmp(l.word, cmd[i].name) == 0)
 			return i;
@@ -643,9 +670,8 @@ int handleData(int idx, string stream, bool* stepOneEnd)
 		ln = readNextWord(stream, &idx, stepOneEnd);
 		if(strcmp(ln.word, "EMPTY") == 0 )
 				break;
-		guidel[DC++].d.num = atoi(ln.word);
-		mem[IC].cml.isData = TRUE;
-		mem[IC++].fieldNum = 2;
+		guidel[DC].data = atoi(ln.word);
+		guidel[DC++].isData = 1;
 	}
 	startIC = IC - startIC;
 	DC -= startIC;

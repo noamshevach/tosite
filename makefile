@@ -1,6 +1,6 @@
 
-myprog: proj.o Queue.o SymbolTable.o 
-	gcc -g -ansi -Wall proj.o Queue.o SymbolTable.o  -o myprog
+myprog: proj.o Queue.o SymbolTable.o proj.h Queue.h SymbolTable.h
+	gcc -g -ansi -Wall proj.o Queue.o SymbolTable.o proj.h Queue.h SymbolTable.h  -o myprog
 
 proj.o: proj.c 
 	gcc -c -ansi -Wall proj.c   -o proj.o

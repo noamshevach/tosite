@@ -1,3 +1,4 @@
+#include <stdio.h>
 #ifndef SYTA_H
 #define SYTA_H
 
