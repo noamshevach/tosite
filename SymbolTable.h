@@ -11,6 +11,7 @@ typedef char* string;
 typedef struct symboltable{
 	string name;
 	int address;
+	int printAddress;
 	struct symboltable* next;
 } symboltable;
 
@@ -19,7 +20,7 @@ symboltable entryTABLE[numOfLetters];
 symboltable externTABLE[numOfLetters];
 
 void initSymbolTable(symboltable st[]);
-void insertToSymbolTable(symboltable s[], string name, int address);
+void insertToSymbolTable(symboltable s[], string name, int address, int printAddress);
 int getLabelAddress(string name, symboltable st[]);
 int returnSymbolTableIdx(char c);
 void freeSymbolTable(symboltable st[]);

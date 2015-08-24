@@ -6,7 +6,7 @@
 #include "Queue.h"
 #include "SymbolTable.h"
 
-/*int main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	int  i = 1; FILE* fp;
 	string filename = malloc(sizeof(string));
@@ -35,37 +35,6 @@
 		freeSymbolTable(entryTABLE);
 		freeSymbolTable(externTABLE);
 	}
-	return 1;
-}*/
-
-int main(int argc, char* argv[])
-{
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-	int  i = 1; FILE* fp;
-	string filename = strdup("ex");
-	initSymbolTable(labelTABLE);
-	initSymbolTable(entryTABLE);
-	initSymbolTable(externTABLE);
-	QUE_initiate();
-
-	if((fp = fopen(strcat(filename, asEndOfFile), "r")) == NULL )
-		fprintf(stderr, "\nError opening file %s ", argv[i]);
-	else{
-		firstStep(fp);
-		secondStep();
-		strcpy(filename, "ex");
-		printMemory(strcat(filename,obEndOfFile));
-		strcpy(filename, "ex");
-		printGuideLines(strcat(filename,obEndOfFile));
-		strcpy(filename, "ex");
-		printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
-		strcpy(filename, "ex");
-		printExternTable(strcat(filename,extEndOfFile));
-	}
-	freeSymbolTable(labelTABLE);
-	freeSymbolTable(entryTABLE);
-	freeSymbolTable(externTABLE);
 	return 1;
 }
 
@@ -255,9 +224,9 @@ void firstStep(FILE* fp)
 			continue;
 		if(isLabelOK(ln[z - 1])){
 			if(ln[z].word[0] != '.')
-				insertToSymbolTable(labelTABLE, ln[z - 1].word, IC);
+				insertToSymbolTable(labelTABLE, ln[z - 1].word, IC, IC + DC);
 			else
-				insertToSymbolTable(labelTABLE, ln[z - 1].word, DC);
+				insertToSymbolTable(labelTABLE, ln[z - 1].word, DC, IC + DC);
 		}
 		if(ln[z].word[0] == '.'){ /* in case of guide sentence*/
 			guideSentence(ln);
@@ -407,7 +376,7 @@ void secondStep()
 			QUE_setIsExtern(FALSE);
 		}else{
 			if(getLabelAddress(QUE_getLabel(), externTABLE) == -1)
-				fprintf(stderr, "\n[line %d]: the label %s is not exsists on file ",QUE_getLine(), QUE_getLabel());
+				fprintf(stderr, "\n[line %d]: the label %s is not exists on file ",QUE_getLine(), QUE_getLabel());
 			else{
 				QUE_setIsExtern(TRUE);
 				if(mem[QUE_getLine() + 1].fieldNum == 3 && mem[QUE_getLine() + 1].cml.label.addr == 0){
@@ -451,8 +420,9 @@ int setLabelAddressInMemory(int memIdx, int address)
 void guideSentence(line ln[])
 {
 	int i = 0;
-	if(strcmp(ln[1].word, ".data") == 0)
+	if(strcmp(ln[1].word, ".data") == 0){
 		DC += ln[1].wordIdx;
+	}
 
 	if(strcmp(ln[1].word, ".string") == 0){
 		if(ln[2].word[0] != '\"' || ln[2].word[strlen(ln[2].word) -1] != '\"')
@@ -462,9 +432,9 @@ void guideSentence(line ln[])
 		guidel[DC++].string = 0;
 	}
 	if(strcmp(ln[1].word, ".entry") == 0)
-		insertToSymbolTable(entryTABLE, ln[2].word, 0);
+		insertToSymbolTable(entryTABLE, ln[2].word, 0, 0);
 	if(strcmp(ln[1].word, ".extern") == 0)
-		insertToSymbolTable(externTABLE, ln[2].word, 0);
+		insertToSymbolTable(externTABLE, ln[2].word,0, 0);
 }
 
 /**
@@ -669,7 +639,7 @@ line readNextWord(string stream, int* idx, bool* stepOneEnd)
  */
 int handleData(int idx, string stream, bool* stepOneEnd)
 {
-	int startIC = IC;
+	int startDC = DC, diff = 0;
 	line ln;
 	while(idx < strlen(stream)){
 		ln = readNextWord(stream, &idx, stepOneEnd);
@@ -678,10 +648,9 @@ int handleData(int idx, string stream, bool* stepOneEnd)
 		guidel[DC].data = atoi(ln.word);
 		guidel[DC++].isData = 1;
 	}
-	startIC = IC - startIC;
-	DC -= startIC;
-	IC -= startIC;
-	return startIC;
+	diff = DC- startDC;
+	DC = startDC;
+	return diff;
 }
 
 /**

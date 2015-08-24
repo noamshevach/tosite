@@ -131,7 +131,7 @@ int isRegister(string str);
 void setLineInMemory(int cmdNum, int addType[], line first, line second, line lastOperand);
 void setVariableOnMemory(int idx, int type, line word, line lastOperand);
 void getLine(FILE* fp, line ln[5],bool* stepOneEnd);
-int handleData(int idx, string stream,bool* stepOneEnd);
+int handleData(int idx, string stream, bool* stepOneEnd);
 line readNextWord(string stream, int* idx, bool* stepOneEnd);
 int between1TO10(int num);
 

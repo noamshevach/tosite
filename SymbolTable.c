@@ -21,9 +21,10 @@ void initSymbolTable(symboltable st[])
 /**
  * This function insert a string and address to the symbol table.
  * name - the new string.
- * line - the new line.
+ * address - the address of the string.
+ * printAddress - this variable contains the line number even if the label is for data.
  */
-void insertToSymbolTable(symboltable s[], string name, int address)
+void insertToSymbolTable(symboltable s[], string name, int address, int printAddress)
 {
 	int idx = returnSymbolTableIdx(name[0]);
 	symboltable* ptr = &s[idx];
@@ -31,6 +32,7 @@ void insertToSymbolTable(symboltable s[], string name, int address)
 		ptr = (*ptr).next;
 	(*ptr).name = name;
 	(*ptr).address = address;
+	(*ptr).printAddress = printAddress;
 	(*ptr).next = malloc(sizeof(symboltable));
 	(*(*ptr).next).name = malloc(sizeof(string));
 	(*(*ptr).next).name = "NULL";
@@ -50,7 +52,7 @@ int getLabelAddress(string name, symboltable st[])
 	symboltable* ptr =  &st[letterIdx];
 	while(strcmp(ptr->name, "NULL") != 0){
 		if(strcmp((*ptr).name, name) == 0)
-			return (*ptr).address;
+			return (*ptr).printAddress;
 		ptr = (*ptr).next;
 	}
 	return -1;
