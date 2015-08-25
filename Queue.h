@@ -30,5 +30,7 @@ void QUE_setIsExtern(int b);
 int returnNodesNumber();
 int returnPtrNodeNumber();
 void QUE_setLine(int line);
+void freeQueue();
+void freeQueue1(queue* tmp);
 
 #endif

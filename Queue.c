@@ -62,6 +62,7 @@ queue QUE_getPtr()
 void QUE_initiate()
 {
 	head = malloc(sizeof(queue));
+	head->label = "NULL";
 	last = head;
 	ptr = head;
 }
@@ -97,6 +98,22 @@ void addToQueue(string label, int line)
 	(*(*last).next).label = "NULL";
 	last = (*last).next;
 	numberOfNodes++;
+}
+
+void freeQueue()
+{
+	freeQueue1(head);
+	head->label = "NULL";
+	last = head;
+	ptr = head;
+}
+
+void freeQueue1(queue* tmp)
+{
+	if(strcmp(tmp->label, "NULL") != 0){
+		freeQueue1(tmp->next);
+		free(tmp->next);
+	}
 }
 
 /**

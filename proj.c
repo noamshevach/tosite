@@ -9,58 +9,36 @@
 int main(int argc, char* argv[])
 {
 	int  i = 1; FILE* fp;
-	string filename = malloc(sizeof(string));
+	int temp = 0;
+	string filename;
+	initSymbolTable(labelTABLE);
+	initSymbolTable(entryTABLE);
+	initSymbolTable(externTABLE);
+	QUE_initiate();
 	for(;argv[i] != NULL; i++){
-		initSymbolTable(labelTABLE);
-		initSymbolTable(entryTABLE);
-		initSymbolTable(externTABLE);
-		QUE_initiate();
-		strcpy(filename, argv[i]);
+		temp = strlen(argv[i]);
+		filename = argv[i];
 
 		if((fp = fopen(strcat(filename, asEndOfFile), "r")) == NULL )
 			fprintf(stderr, "\nError opening file %s ", argv[i]);
 		else{
-			strcpy(filename, argv[i]);
+			filename[temp] = '\0';
 			firstStep(fp);
 			secondStep();
 			printMemory(strcat(filename,obEndOfFile));
-			strcpy(filename, argv[i]);
+			filename[temp] = '\0';
 			printGuideLines(strcat(filename,obEndOfFile));
-			strcpy(filename, argv[i]);
+			filename[temp] = '\0';
 			printEntryTable(entryTABLE, strcat(filename,entEndOfFile));
-			strcpy(filename, argv[i]);
+			filename[temp] = '\0';
 			printExternTable(strcat(filename,extEndOfFile));
 		}
 		freeSymbolTable(labelTABLE);
 		freeSymbolTable(entryTABLE);
 		freeSymbolTable(externTABLE);
+		freeQueue();
 	}
 	return 1;
-}
-
-/*
- * This function is reading from input names of files.
- * fileNames - array of file names.
- */
-void getFileName(string fileNames[], string progName)
-{
-	string s = malloc(sizeof(string));
-	line ln;
-	bool temp = FALSE;
-	int i = 0, idx = 0;
-	printf("Write 'assembler' and then the name of the files you want to run.\n"
-		"example: assembler x y hello\nYour command:");
-	fgets(s, maxLineLength, stdin);
-	ln = readNextWord(s, &idx, &temp);
-	progName = strrchr(progName, '/') + 1;
-	if(strcmp(ln.word, progName) == 0){
-		do {
-			ln = readNextWord(s, &idx, &temp);
-			fileNames[i] = ln.word;
-		}while(strcmp(fileNames[i++], "EMPTY") != 0);
-	}else fprintf(stderr, "wrong input. check your way of writing assembler.");
-	fileNames[i - 1] = "NULL";
-	/*free(s);*/
 }
 
 /*
@@ -214,6 +192,7 @@ void firstStep(FILE* fp)
 	bool errFlag = FALSE, stepOneEnd = FALSE;
 	line ln[lineVar], lastOperand;/* last read line*/
 	initiateLine(ln);
+	IC = 0; DC = 0;
 	while(stepOneEnd == FALSE && ++lineNumber){
 		z = 1;
 		getLine(fp, ln, &stepOneEnd);
@@ -256,9 +235,20 @@ void firstStep(FILE* fp)
 			}
 		}else errFlag = TRUE;
 		free(addType);
+		freeLine(ln);
 	}
 	mem[IC].fieldNum = -1;
 	guidel[DC].string = endOfData;
+}
+
+void freeLine(line ln[])
+{
+	int i = 0;
+	for(; i < 5; i++){
+		if(strcmp(ln[i].word, "NULL") == 0)
+			free(ln[i].word);
+		ln[i].word = "NULL";
+	}
 }
 
 /**
@@ -610,9 +600,9 @@ void setVariableOnMemory(int idx, int type, line word, line lastOperand)
  * stepOneEnd - boolean pointer. (is EOF?)
  * returns the next word.
  */
-line readNextWord(string stream, int* idx, bool* stepOneEnd)
+line readNextWord(string stream, int* idx, bool* stepOneEnd, line* ln)
 {
-	line* ln = malloc(sizeof(line));
+	string s = malloc(sizeof(s) * 100);
 	(*ln).word = "EMPTY";
 	(*ln).wordIdx = 0;
 	int nextBreak = 0, z = 0;
@@ -623,8 +613,8 @@ line readNextWord(string stream, int* idx, bool* stepOneEnd)
 	if(z == -1 || (*idx) > strlen(stream))
 			return (*ln);
 	nextBreak = returnNextBreakIdx(stream, (*idx), stepOneEnd);
-	(*ln).word = malloc(sizeof(string));
-	strncpy((*ln).word ,stream + (*idx), nextBreak - (*idx));
+	strncpy(s ,stream + (*idx), nextBreak - (*idx));
+	(*ln).word = s;
 	(*ln).word[nextBreak - (*idx)] = (char)'\0';
 	(*idx) = nextBreak + 1;
 	return (*ln);
@@ -642,7 +632,7 @@ int handleData(int idx, string stream, bool* stepOneEnd)
 	int startDC = DC, diff = 0;
 	line ln;
 	while(idx < strlen(stream)){
-		ln = readNextWord(stream, &idx, stepOneEnd);
+		readNextWord(stream, &idx, stepOneEnd, &ln);
 		if(strcmp(ln.word, "EMPTY") == 0 )
 				break;
 		guidel[DC].data = atoi(ln.word);
@@ -664,9 +654,8 @@ void getLine(FILE* fp, line ln[], bool* stepOneEnd)
 	string startline = malloc(sizeof(char) * maxLineLength);
 	int idx = 0, i = 1;
 	fgets(startline, maxLineLength, fp);
-	initiateLine(ln);
 	while(idx < strlen(startline) && i < lineVar){
-		ln[i] = readNextWord(startline, &idx, stepOneEnd);
+		readNextWord(startline, &idx, stepOneEnd, (ln + i));
 		if(strcmp(ln[i].word, "EMPTY") == 0)
 			break;
 		if(i == 1 && isLabel(ln[i])){
@@ -674,6 +663,7 @@ void getLine(FILE* fp, line ln[], bool* stepOneEnd)
 			ln[--i].word = malloc(sizeof(string));
 			strcpy(ln[i].word, ln[i + 1].word);
 			ln[i].wordIdx = ln[i + 1].wordIdx;
+			free(ln[i + 1].word);
 		}
 		if(strcmp(ln[i].word, ".data") == 0){
 			ln[i].wordIdx = handleData(idx, startline, stepOneEnd);

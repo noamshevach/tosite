@@ -132,8 +132,9 @@ void setLineInMemory(int cmdNum, int addType[], line first, line second, line la
 void setVariableOnMemory(int idx, int type, line word, line lastOperand);
 void getLine(FILE* fp, line ln[5],bool* stepOneEnd);
 int handleData(int idx, string stream, bool* stepOneEnd);
-line readNextWord(string stream, int* idx, bool* stepOneEnd);
+line readNextWord(string stream, int* idx, bool* stepOneEnd, line* ln);
 int between1TO10(int num);
+void freeLine(line ln[]);
 
 
 #endif

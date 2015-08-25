@@ -12,7 +12,6 @@ void initSymbolTable(symboltable st[])
 {
 	int i = 0;
 	for(; i < numOfLetters; i++){
-		st[i].name = malloc(sizeof(string));
 		st[i].name = "NULL";
 		st[i].next = NULL;
 	}
@@ -30,11 +29,10 @@ void insertToSymbolTable(symboltable s[], string name, int address, int printAdd
 	symboltable* ptr = &s[idx];
 	while(strcmp(ptr->name , "NULL") != 0)
 		ptr = (*ptr).next;
-	(*ptr).name = name;
+	(*ptr).name = strdup(name);
 	(*ptr).address = address;
 	(*ptr).printAddress = printAddress;
 	(*ptr).next = malloc(sizeof(symboltable));
-	(*(*ptr).next).name = malloc(sizeof(string));
 	(*(*ptr).next).name = "NULL";
 }
 
@@ -80,10 +78,7 @@ void freeSymbolTable(symboltable st[])
 	int i = 0;
 	for(; i < numOfLetters; i++){
 		st[i].address = 0;
-		/*if(strcmp(st[i].name, "NULL") != 0)
-			freeList(st);*/
-		st[i].name = "NULL";
-		st[i].next = NULL;
+		freeList(st + i);
 	}
 }
 
@@ -92,9 +87,13 @@ void freeSymbolTable(symboltable st[])
  */
 void freeList(symboltable* st)
 {
-	if(strcmp(st->name, "NULL") != 0)
+	if(strcmp(st->name, "NULL") != 0){
 		freeList(st->next);
-	free(st);
+		free(st->name);
+		free(st->next);
+		st->name = "NULL";
+		st->next = NULL;
+	}
 }
 
 /**
