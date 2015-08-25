@@ -245,7 +245,7 @@ void freeLine(line ln[])
 {
 	int i = 0;
 	for(; i < 5; i++){
-		if(strcmp(ln[i].word, "NULL") == 0)
+		if(strcmp(ln[i].word, "NULL") != 0)
 			free(ln[i].word);
 		ln[i].word = "NULL";
 	}
@@ -660,10 +660,12 @@ void getLine(FILE* fp, line ln[], bool* stepOneEnd)
 			break;
 		if(i == 1 && isLabel(ln[i])){
 			ln[i].word[idx - 2] = (char)'\0';
-			ln[--i].word = malloc(sizeof(string));
+			i--;
+			ln[i].word = malloc(sizeof(string) * 100);
 			strcpy(ln[i].word, ln[i + 1].word);
 			ln[i].wordIdx = ln[i + 1].wordIdx;
 			free(ln[i + 1].word);
+			ln[i + 1].word = "NULL";
 		}
 		if(strcmp(ln[i].word, ".data") == 0){
 			ln[i].wordIdx = handleData(idx, startline, stepOneEnd);

@@ -92,7 +92,7 @@ queue* QUE_getHead()
  */
 void addToQueue(string label, int line)
 {
-	(*last).label = label;
+	(*last).label = (char*)strdup(label);
 	(*last).line = line;
 	(*last).next = malloc(sizeof(queue));
 	(*(*last).next).label = "NULL";
@@ -112,6 +112,7 @@ void freeQueue1(queue* tmp)
 {
 	if(strcmp(tmp->label, "NULL") != 0){
 		freeQueue1(tmp->next);
+		free(tmp->label);
 		free(tmp->next);
 	}
 }

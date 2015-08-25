@@ -29,7 +29,7 @@ void insertToSymbolTable(symboltable s[], string name, int address, int printAdd
 	symboltable* ptr = &s[idx];
 	while(strcmp(ptr->name , "NULL") != 0)
 		ptr = (*ptr).next;
-	(*ptr).name = strdup(name);
+	(*ptr).name = (char*)strdup(name);
 	(*ptr).address = address;
 	(*ptr).printAddress = printAddress;
 	(*ptr).next = malloc(sizeof(symboltable));
